@@ -75,7 +75,7 @@
         input-data  (:input data)]
     [:main
      [:section.todoapp
-      [header (:value input-data)]
+      [header input-data]
       [:section
        [:section.main
         (when (:showing? toggle-data)
