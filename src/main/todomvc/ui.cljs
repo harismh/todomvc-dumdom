@@ -48,7 +48,7 @@
    [:footer.info
     [:p "Double-click to edit a todo."]
     [:p "Code by "
-     (external-link "https://github.com/harismh/todomvc_dumdom" "harismh.")]
+     (external-link "https://github.com/harismh/todomvc-dumdom" "harismh.")]
     [:p "Styles sourced from "
      (external-link "https://todomvc.com" "TodoMVC.")]]])
 
