@@ -1,0 +1,17 @@
+{
+  "name": "todomvc_dumdom",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "snabbdom": "3.5.1",
+    "todomvc-app-css": "2.4.3",
+    "todomvc-common": "1.0.5"
+  },
+  "devDependencies": {
+    "shadow-cljs": "2.26.2"
+  },
+  "scripts": {
+    "dev": "npx shadow-cljs watch app",
+    "postinstall": "npx shadow-cljs compile app; mkdir public/lib; cp node_modules/todomvc-common/base.css public/lib/todomvc-common.base.css; cp node_modules/todomvc-app-css/index.css public/lib/todomvc-app-css.index.css"
+  }
+}
