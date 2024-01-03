@@ -76,17 +76,17 @@
 
     :todo/select-filter (assoc state :filter (:filter payload))
 
-    :todo/input (if (and (= return-key-code (get-in payload [:event :key-code]))
-                         (not= "" (get-in payload [:event :value])))
-                  (-> state
-                      (assoc :input "")
-                      (assoc-in [:todos] (into [{:id (random-uuid)
-                                                 :title (get-in payload [:event :value])
-                                                 :completed? false
-                                                 :editing? false}]
-                                               (:todos state))))
-                  state)
-
+    :todo/input (let [input          (get-in payload [:event :value])
+                      is-return-key? (= return-key-code (get-in payload [:event :key-code]))]
+                  (if (and (not= "" input) is-return-key?)
+                    (-> state
+                        (assoc :input "")
+                        (assoc :todos (into [{:id (random-uuid)
+                                              :title input
+                                              :completed? false
+                                              :editing? false}]
+                                            (:todos state))))
+                    (assoc state :input input)))
     state))
 
 (comment
