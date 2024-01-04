@@ -1,88 +1,100 @@
 (ns todomvc.ui
   (:require [dumdom.core :refer [defcomponent]]))
 
-(defcomponent input [{:keys [value]}]
-  [:input.new-todo {:type "text"
-                    :value value
-                    :placeholder "What needs to be done?"
-                    :on-key-down [[:todo/input]]}])
+;;;; Building Blocks
+
+(defcomponent input [{:keys [id, type, value, placeholder, class,
+                             checked?, on-click, on-key-down]}]
+  [:input {:id id
+           :type (or type "text")
+           :value value
+           :placeholder placeholder
+           :checked checked?
+           :class class
+           :on-click on-click
+           :on-key-down on-key-down}])
+
+(defcomponent anchor [{:keys [href, label,
+                              on-click, class,
+                              rel, target]}]
+  [:a {:class class
+       :href href
+       :on-click on-click
+       :target target
+       :rel rel}
+   label])
+
+(defcomponent span [{:keys [class label]}]
+  [:span {:class class}
+   label])
+
+(defcomponent button [{:keys [class on-click label]}]
+  [:button {:class class
+            :on-click on-click}
+   label])
+
+(defcomponent label [{:keys [label label-for on-dbl-click]}]
+  [:label {:for label-for
+           :on-dbl-click on-dbl-click}
+   label])
+
+;;;; Composed Blocks
+
+(def footer-notice
+  [:footer.info
+   [:p "Double-click to edit a todo."]
+   [:p "Code by "
+    [anchor {:href "https://github.com/harismh/todomvc-dumdom"
+             :label "harismh."
+             :target "_blank"
+             :rel "noopener noreferrer"}]]
+   [:p "Styles sourced from "
+    [anchor {:href "https://todomvc.com"
+             :label "TodoMVC."
+             :target "_blank"
+             :rel "noopener noreferrer"}]]])
 
 (defcomponent header [data]
   [:header.header
-   [:h1 "todos"]
-   [input data]])
+   [:h1 (:heading (:header data))]
+   [input (:input data)]])
 
-(defcomponent toggle-all []
-  [:span
-   [:input#toggle-all.toggle-all {:type "checkbox"
-                                  :on-click [[:todo/toggle-all]]}]
-   [:label {:for "toggle-all"} "Mark all as complete"]])
-
-(defcomponent filter-toggle [{:keys [href, selected?, label, filter]}]
-  [:a {:class (when selected? "selected")
-       :href href
-       :on-click [[:todo/select-filter {:filter filter}]]} label])
-
-(defcomponent footer-filters [selected]
-  [:ul.filters
-   [:li [filter-toggle {:href "#/" :label "All" :selected? (= selected :all) :filter :all}]]
-   [:li [filter-toggle {:href "#/active" :label "Active" :selected? (= selected :active) :filter :active}]]
-   [:li [filter-toggle {:href "#/completed" :label "Completed" :selected? (= selected :completed) :filter :completed}]]])
-
-(defcomponent footer-count [label]
-  [:span.todo-count label])
-
-(defcomponent footer-clear-completed []
-  [:button.clear-completed {:on-click [[:todo/clear-completed]]}
-   "Clear completed"])
-
-(defn external-link [href text]
-  [:a {:href href :target "_blank" :rel "noopener noreferrer"} text])
-
-(defcomponent footer [data]
+(defcomponent footer [footer-data]
   [:footer.footer
-   [footer-count (:remaining-todos-label data)]
-   [footer-filters (:selected-filter data)]
-   (when (:showing-clear-complete? data)
-     [footer-clear-completed])
-   [:footer.info
-    [:p "Double-click to edit a todo."]
-    [:p "Code by "
-     (external-link "https://github.com/harismh/todomvc-dumdom" "harismh.")]
-    [:p "Styles sourced from "
-     (external-link "https://todomvc.com" "TodoMVC.")]]])
+   [span (:span footer-data)]
+   [:ul.filters
+    (for [filter-data (:filters footer-data)]
+      [:li [anchor filter-data]])]
+   (when (:showing? (:button footer-data))
+     [button (:button footer-data)])
+   footer-notice])
 
-
-(defcomponent todo-checkbox [{:keys [id completed?]}]
-  [:input.toggle {:type "checkbox"
-                  :checked completed?
-                  :on-change [[:todo/edit-todo {:id id :completed? (not completed?)}]]}])
-
-(defcomponent todo-item [{:keys [title id completed? editing?] :as todo}]
-  [:li {:class (str (when completed? "completed ") (when editing? " editing"))}
+(defcomponent item [item-data]
+  [:li {:class (:class item-data)}
    [:div.view
-    (todo-checkbox todo)
-    [:label {:on-dbl-click [[:todo/edit-todo {:id id :editing? true}]]} title]
-    [:button.destroy {:on-click [[:todo/delete-todo {:id id}]]}]]
-   (when editing? [:input.edit {:type "text"
-                                :value title
-                                :on-key-down [[:todo/edit-todo {:id id}]]}])])
+    [input (:input (:toggle item-data))]
+    [label (:label item-data)]
+    [button (:button item-data)]]
+   (when (:showing? (:input item-data))
+     [input (:input item-data)])])
+
+;;;; Application Shell
 
 (defcomponent shell [data]
   (let [list-data   (:list data)
-        toggle-data (:toggle-all data)
+        toggle-data (:toggle data)
         footer-data (:footer data)
-        input-data  (:input data)]
-    [:main
-     [:section.todoapp
-      [header input-data]
-      [:section
-       [:section.main
-        (when (:showing? toggle-data)
-          [:span
-           [toggle-all]
-           [:ul.todo-list
-            (for [todo (:todos list-data)]
-              [todo-item todo])]])]
-       (when (:showing? footer-data)
-         [footer footer-data])]]]))
+        header-data (select-keys data [:header :input])]
+    [:main.todoapp
+     [header header-data]
+     [:section.main
+      (when (:showing? toggle-data)
+        [:section.toggle
+         [input (:input toggle-data)]
+         [label (:label toggle-data)]])
+      [:section.list
+       [:ul.todo-list
+        (for [item-data (:items list-data)]
+          [item item-data])]]]
+     (when (:showing? footer-data)
+       [footer footer-data])]))

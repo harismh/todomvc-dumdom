@@ -35,12 +35,10 @@
      (if (nil? (action model/available-actions))
        (throw (js/Error. (str "Unknown action " action)))
        (let [event-val (.. event -target -value)
-             event-chk (.. event -target -checked)
              event-key (.. event -keyCode)
              payload   (cond-> (or data {})
                          event-val (assoc-in [:event :value] event-val)
-                         event-key (assoc-in [:event :key-code] event-key)
-                         event-chk (assoc-in [:event :checked?] event-chk))]
+                         event-key (assoc-in [:event :key-code] event-key))]
          (prn "Triggered action" action payload)
          (reset! store (model/handle-action action payload @store)))))))
 
