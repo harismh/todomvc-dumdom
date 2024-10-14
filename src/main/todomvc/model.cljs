@@ -119,7 +119,7 @@
                   (if (and (not= "" input) is-return-key?)
                     (-> state
                         (assoc :input "")
-                        (assoc :todos (into [{:id (random-uuid)
+                        (assoc :todos (into [{:id (subs (str (random-uuid)) 24)
                                               :title input
                                               :completed? false
                                               :editing? false}]
@@ -130,15 +130,15 @@
 (comment
   (prepare-ui-data
    (merge initial-state
-          {:todos [{:id "v3pYXsm0"
+          {:todos [{:id "d8a1223f48f6"
                     :title "Complete me"
                     :completed? false
                     :editing? false}
-                   {:id "CaLZgRDx"
+                   {:id "0190486b3b2c"
                     :title "Completed me"
                     :completed? true
                     :editing? false}
-                   {:id "1yg10NhY"
+                   {:id "6a0917d459a0"
                     :title "Editing me"
                     :completed? false
                     :editing? true}]})))
