@@ -1,1 +1,1 @@
-{:ignore [:unresolved-symbol]}
+{:lint-as {dumdom.core/defcomponent clojure.core/defn}}
